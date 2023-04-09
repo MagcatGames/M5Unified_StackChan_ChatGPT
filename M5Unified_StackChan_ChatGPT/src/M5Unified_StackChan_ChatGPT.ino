@@ -15,6 +15,12 @@
 #include <ESP32WebServer.h>
 #include <ESPmDNS.h>
 
+#include <StackChan_Config.h>
+#include <StackChan_CaptivePortal.h>
+
+StackChan_Config sccfg;
+StackChan_CaptivePortal sccp;
+
 const char *SSID = "YOUR_WIFI_SSID";
 const char *PASSWORD = "YOUR_WIFI_PASSWORD";
 
@@ -378,10 +384,25 @@ void setup()
   M5.Speaker.begin();
 
   M5.Lcd.setTextSize(2);
+
+  // check wifi settings
+  if(!sccfg.HasKey()){
+    Serial.println("We have started the Captive Portal mode.");
+    Serial.println("Please connect to StackChanAP using WiFi.");
+    sccp.Begin();
+    return;
+  }
+  /*
+  // if something wrong. you can clear WiFi settings.
+  if( *something* ){
+    sccfg.Clear();
+  }
+  */
+
   Serial.println("Connecting to WiFi");
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);
-  WiFi.mode(WIFI_STA);  WiFi.begin(SSID, PASSWORD);
+  WiFi.mode(WIFI_STA);  WiFi.begin(sccfg.GetSSID().c_str(),sccfg.GetPassword().c_str());
   M5.Lcd.print("Connecting");
   while (WiFi.status() != WL_CONNECTED) {
     delay(250);
@@ -436,6 +457,11 @@ void setup()
 
 void loop()
 {
+  if(!sccfg.HasKey()){
+    sccp.Update();
+    return;
+  }
+
   static int lastms = 0;
 
   // if (Serial.available()) {
