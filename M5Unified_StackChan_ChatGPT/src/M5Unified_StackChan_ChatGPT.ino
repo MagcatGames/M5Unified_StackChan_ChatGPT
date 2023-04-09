@@ -387,8 +387,7 @@ void setup()
 
   // check wifi settings
   if(!sccfg.HasKey()){
-    Serial.println("We have started the Captive Portal mode.");
-    Serial.println("Please connect to StackChanAP using WiFi.");
+    M5.Lcd.println("We have started the Captive Portal mode. \n\nPlease connect to StackChanAP using WiFi.");
     sccp.Begin();
     return;
   }

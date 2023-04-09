@@ -1,7 +1,7 @@
 #include <StackChan_CaptivePortal.h>
 #include <StackChan_Config.h>
 
-void StackChan_CaptivePortal::handle_Home()
+bool StackChan_CaptivePortal::handle_Home()
 {
     String ssid = cfg.GetSSID();
     server.send(200, "text/html",
@@ -25,21 +25,24 @@ void StackChan_CaptivePortal::handle_Home()
             "</body>"
         "</html>"
         );
+    return true;
 }
 
-void StackChan_CaptivePortal::handle_Get()
+bool StackChan_CaptivePortal::handle_Get()
 {
     String ssid = server.arg("wifi_ssid");
     String pass = server.arg("wifi_pass");
     cfg.SetSSID(ssid);
     cfg.SetPassword(pass);
+    ESP.restart();
+    return true;
 }
 
 StackChan_CaptivePortal::StackChan_CaptivePortal()
 {
     ESP32WebServer server(80);
     DNSServer dnsServer;
-    IPAddress ip = IPAddress(8,8,5,5);
+    IPAddress ip(192,168,4,1);
     StackChan_Config cfg;
 }
 

@@ -14,9 +14,8 @@ class StackChan_CaptivePortal
         void Begin();
         void Update();
     private:
-        void handle_Home();
-        void handle_Get();
-        void handle_Reset();
+        bool handle_Home();
+        bool handle_Get();
         ESP32WebServer server;
         DNSServer dnsServer;
         IPAddress ip;
