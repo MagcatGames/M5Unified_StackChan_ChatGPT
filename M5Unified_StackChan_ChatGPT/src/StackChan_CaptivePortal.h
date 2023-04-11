@@ -1,6 +1,7 @@
 #ifndef SCCP_CAPTIVEPORTAL
 #define SCCP_CAPTIVEPORTAL
 
+#include <WiFi.h>
 #include <ESP32WebServer.h>
 #include <DNSServer.h>
 #include <Preferences.h>
@@ -19,6 +20,9 @@ class StackChan_CaptivePortal
 
         void Begin();
         void Update();
+
+        String makePage(String title, String contents);
+        String urlDecode(String input);
     private:
         ESP32WebServer server;
         DNSServer dnsServer;
