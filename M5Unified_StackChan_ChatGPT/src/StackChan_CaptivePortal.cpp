@@ -1,10 +1,40 @@
 #include <StackChan_CaptivePortal.h>
-#include <StackChan_Config.h>
 
-bool StackChan_CaptivePortal::handle_Home()
+
+StackChan_CaptivePortal::StackChan_CaptivePortal()
 {
-    String ssid = cfg.GetSSID();
-    server.send(200, "text/html",
+    ESP32WebServer server(80);
+    DNSServer dnsServer;
+    StackChan_Config cfg;
+}
+
+void StackChan_CaptivePortal::Begin()
+{
+    IPAddress apIP(192,168,4,1);
+
+    cfg.Open();
+    WiFi.mode(WIFI_AP);
+    WiFi.disconnect();
+    delay(100);
+
+    int n = WiFi.scanNetworks();
+    delay(100);
+
+    WiFi.softAP("StackChanAP");
+    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+    dnsServer.start(53,"*", apIP);
+    delay(100);
+
+    String ssidList = "<datalist id='ssidList'>";
+    for (int i = 0; i < n; ++i) {
+        ssidList += sprintf("<option value='%s'>%s</option>",WiFi.SSID(i).c_str());
+    }
+    ssidList += "</datalist>";
+    delay(100);
+
+    server.onNotFound([&](){
+        String ssid = cfg.GetSSID();
+        server.send(200, "text/html",
         "<!DOCTYPE html>"
         "<html lang='ja'>"
             "<head>"
@@ -15,9 +45,10 @@ bool StackChan_CaptivePortal::handle_Home()
             "<body>"
                 "<h1>StackChan WiFi Setup</h1>"
                 "<hr style='width:80%'>"
-                "<form action='get' method='get'>"
+                "<form method='get' action='settings'>"
                     "<div>SSID</div>"
-                    "<div><input type='text' name='wifi_ssid' value='"+ssid+"' required><span style='color:red'>*</span></div>"
+                    "<div><input type='text' name='wifi-ssid' value='"+ssid+"' autocomplete='on' list='ssidList' >required><span style='color:red'>*</span></div>"
+                    +ssidList+
                     "<div>Password</div>"
                     "<div><input type='password' name='wifi_pass'></div>"
                     "<div><input type='submit'></div>"
@@ -25,36 +56,14 @@ bool StackChan_CaptivePortal::handle_Home()
             "</body>"
         "</html>"
         );
-    return true;
-}
-
-bool StackChan_CaptivePortal::handle_Get()
-{
-    String ssid = server.arg("wifi_ssid");
-    String pass = server.arg("wifi_pass");
-    cfg.SetSSID(ssid);
-    cfg.SetPassword(pass);
-    ESP.restart();
-    return true;
-}
-
-StackChan_CaptivePortal::StackChan_CaptivePortal()
-{
-    ESP32WebServer server(80);
-    DNSServer dnsServer;
-    IPAddress ip(192,168,4,1);
-    StackChan_Config cfg;
-}
-
-void StackChan_CaptivePortal::Begin()
-{
-    cfg.Open();
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP("StackChanAP");
-    WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
-    dnsServer.start(53, "*", ip);
-    server.onNotFound(std::bind(&StackChan_CaptivePortal::handle_Home, this)); // よく理解してないが動いたのでヨシ！
-    server.on("/get", std::bind(&StackChan_CaptivePortal::handle_Get, this)); // よく理解してないが動いたのでヨシ！
+    });
+    server.on("/settings",[&](){
+        String ssid = server.arg("wifi_ssid");
+        String pass = server.arg("wifi_pass");
+        cfg.SetSSID(ssid);
+        cfg.SetPassword(pass);
+        ESP.restart();
+    });
     server.begin();
 }
 
