@@ -15,10 +15,8 @@
 #include <ESP32WebServer.h>
 #include <ESPmDNS.h>
 
-#include <StackChan_Config.h>
 #include <StackChan_CaptivePortal.h>
 
-StackChan_Config sccfg;
 StackChan_CaptivePortal sccp;
 
 const char *SSID = "YOUR_WIFI_SSID";
@@ -360,6 +358,21 @@ static box_t box_servo;
 
 void setup()
 {
+  // check wifi settings
+  if(!sccp.HasKey()){
+    M5.begin();
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.println("We have started the Captive Portal mode. \n\nPlease connect to StackChanAP using WiFi.");
+    sccp.Begin();
+    return;
+  }
+  /*
+  // if something wrong. you can clear WiFi settings.
+  if( *something* ){
+    sccfg.Clear();
+  }
+  */
+
   auto cfg = M5.config();
 
   cfg.external_spk = true;    /// use external speaker (SPK HAT / ATOMIC SPK)
@@ -385,23 +398,10 @@ void setup()
 
   M5.Lcd.setTextSize(2);
 
-  // check wifi settings
-  if(!sccfg.HasKey()){
-    M5.Lcd.println("We have started the Captive Portal mode. \n\nPlease connect to StackChanAP using WiFi.");
-    sccp.Begin();
-    return;
-  }
-  /*
-  // if something wrong. you can clear WiFi settings.
-  if( *something* ){
-    sccfg.Clear();
-  }
-  */
-
   Serial.println("Connecting to WiFi");
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);
-  WiFi.mode(WIFI_STA);  WiFi.begin(sccfg.GetSSID().c_str(),sccfg.GetPassword().c_str());
+  WiFi.mode(WIFI_STA);  WiFi.begin(sccp.GetSSID().c_str(),sccp.GetPassword().c_str());
   M5.Lcd.print("Connecting");
   while (WiFi.status() != WL_CONNECTED) {
     delay(250);
@@ -456,8 +456,9 @@ void setup()
 
 void loop()
 {
-  if(!sccfg.HasKey()){
+  if(!sccp.HasKey()){
     sccp.Update();
+    delay(10);
     return;
   }
 
