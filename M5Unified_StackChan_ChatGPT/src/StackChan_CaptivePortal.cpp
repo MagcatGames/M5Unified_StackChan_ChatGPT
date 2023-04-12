@@ -1,4 +1,5 @@
 #include <StackChan_CaptivePortal.h>
+#include <M5Unified.h>
 /*
 #include <ESP32WebServer.h>
 #include <DNSServer.h>
@@ -12,19 +13,50 @@ StackChan_CaptivePortal::StackChan_CaptivePortal()
     ESP32WebServer server(80);
     DNSServer dnsServer;
     Preferences pref;
-    pref.begin("SCCP");
 }
 
+bool StackChan_CaptivePortal::HasKey()
+{
+    pref.begin("SCCP");
+    bool b = pref.isKey("wifi_ssid");
+    pref.end();
+    return b;
+}
 
-bool StackChan_CaptivePortal::HasKey(){return pref.isKey("wifi_ssid");}
+String StackChan_CaptivePortal::GetSSID()
+{
+    pref.begin("SCCP");
+    String s = pref.getString("wifi_ssid");
+    pref.end();
+    return s;
+}
+String StackChan_CaptivePortal::GetPassword()
+{
+    pref.begin("SCCP");
+    String s = pref.getString("wifi_pass");
+    pref.end();
+    return s;
+}
 
-String StackChan_CaptivePortal::GetSSID(){return pref.getString("wifi_ssid");}
-String StackChan_CaptivePortal::GetPassword(){return pref.getString("wifi_pass");}
+void StackChan_CaptivePortal::SetSSID(String ssid)
+{
+    pref.begin("SCCP");
+    pref.putString("wifi_ssid",ssid);
+    pref.end();
+}
+void StackChan_CaptivePortal::SetPassword(String pass)
+{
+    pref.begin("SCCP");
+    pref.putString("wifi_pass",pass);
+    pref.end();
+}
 
-void StackChan_CaptivePortal::SetSSID(String ssid){pref.putString("wifi_ssid",ssid);}
-void StackChan_CaptivePortal::SetPassword(String pass){pref.putString("wifi_pass",pass);}
-
-void StackChan_CaptivePortal::Clear(){pref.clear();}
+void StackChan_CaptivePortal::Clear()
+{
+    pref.begin("SCCP");
+    pref.clear();
+    pref.end();
+}
 
 void StackChan_CaptivePortal::Begin()
 {
