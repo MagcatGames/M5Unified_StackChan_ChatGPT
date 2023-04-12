@@ -358,20 +358,28 @@ static box_t box_servo;
 
 void setup()
 {
+  M5.begin();
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.println("1.");
+  M5.Lcd.println(sccp.HasKey());
+  M5.Lcd.println("2.");
+  M5.Lcd.println(sccp.HasKey());
+
   // check wifi settings
   if(!sccp.HasKey()){
-    M5.begin();
-    M5.Lcd.setTextSize(2);
     M5.Lcd.println("We have started the Captive Portal mode. \n\nPlease connect to StackChanAP using WiFi.");
     sccp.Begin();
     return;
   }
-  /*
   // if something wrong. you can clear WiFi settings.
-  if( *something* ){
-    sccfg.Clear();
+  if( true ){
+    M5.Lcd.println("Settings has been cleared.");
+    sccp.Clear();
+    delay(3000);
+    ESP.restart();
+    return;
   }
-  */
+  
 
   auto cfg = M5.config();
 

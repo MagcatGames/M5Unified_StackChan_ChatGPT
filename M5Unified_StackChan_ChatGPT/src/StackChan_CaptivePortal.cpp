@@ -56,67 +56,58 @@ void StackChan_CaptivePortal::Begin()
     delay(100);
 
     server.onNotFound([&](){
-        String s =
-            "<h1>Wi-Fi Settings</h1><p>Please enter your password by "
-            "selecting the SSID.</p>";
-            s += "<form method=\"get\" action=\"setap\"><label>SSID: "
-            "</label><select name=\"ssid\">";
-            s += ssidList;
-            s += "</select><br>Password: <input name=\"pass\" length=64 "
-            "type=\"password\"><input type=\"submit\"></form>";
-        server.send(200, "text/html", makePage("Wi-Fi Settings", s));
+        String s;
+        s += "<!DOCTYPE html>";
+        s += "<html lang='ja'>";
+        s += "<head>";
+        s += "<meta charset='UTF-8'>";
+        s += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+        s += "<title>StackChan WiFi Setup</title>";
+        s += "</head>";
+        s += "<body>";
+        s += "<h1>StackChan WiFi Setup</h1>";
+        s += "<hr style='width:80%'>";
+        s += "<form method='get' action='settings'>";
+        s += "<div>SSID</div>";
+        s += "<div><input type='text' name='wifi-ssid' autocomplete='on' list='ssidList' required/><span style='color:red'>*</span></div>";
+        s +=  ssidList;
+        s += "<div>Password</div>";
+        s += "<div><input type='password' name='wifi_pass'/></div>";
+        s += "<div><input type='submit'/></div>";
+        s += "</form>";
+        s += "</body>";
+        s += "</html>";
+        server.send(200, "text/html", s);
     });
     
-    server.on("/setap",[&](){
+    server.on("/settings",[&](){
         String ssid = urlDecode(server.arg("ssid"));
         String pass = urlDecode(server.arg("pass"));
 
-        pref.putString("WIFI_SSID", ssid);
-        pref.putString("WIFI_PASSWD", pass);
+        SetSSID(ssid);
+        SetPassword(pass);
 
-        String s = "<h1>Setup complete.</h1><p>device will be connected to \"";
-            s += ssid;
-            s += "\" after the restart.";
-        server.send(200, "text/html", makePage("Wi-Fi Settings", s));
+        String s;
+        s += "<!DOCTYPE html>";
+        s += "<html lang='ja'>";
+        s += "<head>";
+        s += "<meta charset='UTF-8'>";
+        s += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+        s += "<title>StackChan WiFi Setup</title>";
+        s += "</head>";
+        s += "<body>";
+        s += "<h1>StackChan WiFi Setup</h1>";
+        s += "<hr style='width:80%'>";
+        s += "device will be connected to \"";
+        s += ssid;
+        s += "\" after the restart.";
+        s += "</body>";
+        s += "</html>";
+        server.send(200, "text/html", s);
         delay(2000);
         ESP.restart();
     });
 
-    /*
-    server.on("/settings",[&](){
-        String ssid = server.arg("wifi_ssid");
-        String pass = server.arg("wifi_pass");
-        SetSSID(ssid);
-        SetPassword(pass);
-        ESP.restart();
-    });
-
-    server.onNotFound([&](){
-        String ssid = GetSSID();
-        server.send(200, "text/html",
-        "<!DOCTYPE html>"
-        "<html lang='ja'>"
-            "<head>"
-                "<meta charset='UTF-8'>"
-                "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-                "<title>StackChan WiFi Setup</title>"
-            "</head>"
-            "<body>"
-                "<h1>StackChan WiFi Setup</h1>"
-                "<hr style='width:80%'>"
-                "<form method='get' action='settings'>"
-                    "<div>SSID</div>"
-                    "<div><input type='text' name='wifi-ssid' autocomplete='on' list='ssidList' required/><span style='color:red'>*</span></div>"
-                    +ssidList+
-                    "<div>Password</div>"
-                    "<div><input type='password' name='wifi_pass'/></div>"
-                    "<div><input type='submit'/></div>"
-                "</form>"
-            "</body>"
-        "</html>"
-        );
-    });
-    */
     server.begin();
 }
 
@@ -126,17 +117,6 @@ void StackChan_CaptivePortal::Update()
     server.handleClient();
 }
 
-
-String StackChan_CaptivePortal::makePage(String title, String contents) {
-  String s = "<!DOCTYPE html><html><head>";
-  s += "<meta name=\"viewport\" content=\"width=device-width,user-scalable=0\">";
-  s += "<title>";
-  s += title;
-  s += "</title></head><body>";
-  s += contents;
-  s += "</body></html>";
-  return s;
-}
 
 String StackChan_CaptivePortal::urlDecode(String input){
   String s = input;
