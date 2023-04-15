@@ -366,18 +366,6 @@ void setup()
     sccp.Begin();
     return;
   }
-  /*
-  // if something wrong. you can clear WiFi settings.
-  if( something wrong ){
-    M5.begin();
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.println("Settings has been cleared.");
-    sccp.Clear();
-    delay(3000);
-    ESP.restart();
-    return;
-  }
-  */
 
   auto cfg = M5.config();
 
@@ -386,6 +374,16 @@ void setup()
 //cfg.external_spk_detail.omit_spk_hat    = true; // exclude SPK HAT
 
   M5.begin(cfg);
+
+  // if something wrong. please pressing A-button and restart.  you can clear WiFi settings.
+  if(M5.BtnA.isPressed()){
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.println("Settings has been cleared. Please wait for 5 sec to restart.");
+    sccp.Clear();
+    delay(3000);
+    ESP.restart();
+    return;
+  }
 
   preallocateBuffer = (uint8_t *)malloc(preallocateBufferSize);
   if (!preallocateBuffer) {
@@ -408,6 +406,7 @@ void setup()
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);
   WiFi.mode(WIFI_STA);  WiFi.begin(sccp.GetSSID().c_str(),sccp.GetPassword().c_str());
+  M5.Lcd.println("To clear Settings. hold A and restart.");
   M5.Lcd.print("Connecting");
   while (WiFi.status() != WL_CONNECTED) {
     delay(250);

@@ -6,6 +6,7 @@
 #include <DNSServer.h>
 #include <Preferences.h>
 
+
 class StackChan_CaptivePortal
 {
     public:
@@ -27,6 +28,7 @@ class StackChan_CaptivePortal
         ESP32WebServer server;
         DNSServer dnsServer;
         Preferences pref;
+        String ssidList;
 };
 
 #endif

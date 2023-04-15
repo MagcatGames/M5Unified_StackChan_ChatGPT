@@ -1,5 +1,6 @@
 #include <StackChan_CaptivePortal.h>
 #include <M5Unified.h>
+
 /*
 #include <ESP32WebServer.h>
 #include <DNSServer.h>
@@ -10,9 +11,10 @@
 
 StackChan_CaptivePortal::StackChan_CaptivePortal()
 {
-    ESP32WebServer server(80);
-    DNSServer dnsServer;
-    Preferences pref;
+    StackChan_CaptivePortal::server = ESP32WebServer(80);
+    StackChan_CaptivePortal::dnsServer;
+    StackChan_CaptivePortal::pref;
+    StackChan_CaptivePortal::ssidList;
 }
 
 bool StackChan_CaptivePortal::HasKey()
@@ -69,7 +71,6 @@ void StackChan_CaptivePortal::Begin()
     int n = WiFi.scanNetworks();
     delay(100);
 
-    String ssidList;
     ssidList = "<datalist id='ssidList'>";
     for (int i = 0; i < n && i < 10; ++i) {
         ssidList += "<option value='";
@@ -86,6 +87,7 @@ void StackChan_CaptivePortal::Begin()
     WiFi.mode(WIFI_MODE_AP);
     dnsServer.start(53,"*", WiFi.softAPIP());
     delay(100);
+
 
     server.onNotFound([&](){
         String s;
@@ -112,9 +114,9 @@ void StackChan_CaptivePortal::Begin()
         server.send(200, "text/html", s);
     });
     
-    server.on("/settings",[&](){
-        String ssid = urlDecode(server.arg("ssid"));
-        String pass = urlDecode(server.arg("pass"));
+    server.on("/settings", HTTP_GET, [&](){
+        String ssid = urlDecode(server.arg("wifi-ssid"));
+        String pass = urlDecode(server.arg("wifi_pass"));
 
         SetSSID(ssid);
         SetPassword(pass);
@@ -137,7 +139,7 @@ void StackChan_CaptivePortal::Begin()
         s += "</html>";
         server.send(200, "text/html", s);
         delay(2000);
-        ESP.restart();
+        //ESP.restart();
     });
 
     server.begin();
