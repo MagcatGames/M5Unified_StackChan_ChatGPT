@@ -366,8 +366,6 @@ void setup()
     sccp.Begin();
     return;
   }
-  SSID = sccp.GetSSID().c_str();
-  PASSWORD = sccp.GetPassword().c_str();
 
   auto cfg = M5.config();
 
@@ -406,7 +404,7 @@ void setup()
   Serial.println("Connecting to WiFi");
   WiFi.disconnect();
   WiFi.softAPdisconnect(true);
-  WiFi.mode(WIFI_STA);  WiFi.begin(SSID, PASSWORD);
+  WiFi.mode(WIFI_STA);  WiFi.begin(sccp.GetSSID().c_str(), sccp.GetPassword().c_str());
   M5.Lcd.println("To clear Settings. hold A and restart.");
   M5.Lcd.print("Connecting");
   while (WiFi.status() != WL_CONNECTED) {
